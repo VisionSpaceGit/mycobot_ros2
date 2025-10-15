@@ -6,14 +6,17 @@ from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
 from launch.event_handlers import OnProcessExit  
+from launch.conditions import IfCondition
 
 def generate_launch_description():
+    gzb_share = get_package_share_directory('gazebo_ros')
     pkg_share = get_package_share_directory('mycobot_280jn')
     dsc_share = get_package_share_directory('mycobot_description')
 
     world = LaunchConfiguration('world')
     entity_name = LaunchConfiguration('entity_name') 
     rviz_config = LaunchConfiguration('rviz_config')
+    use_rviz = LaunchConfiguration('use_rviz')
 
     ros2_control_config = PathJoinSubstitution(
         [pkg_share, 'config', 'mycobot_280jn_ros2_control.yaml']
@@ -25,11 +28,17 @@ def generate_launch_description():
 
     robot_description_content = ParameterValue(
         Command([
-            'xacro', ' ',
-            gazebo_xacro, ' ',
+            'xacro', ' ', gazebo_xacro, ' ',
             'ros2_control_config:=', ros2_control_config
         ]),
         value_type=str
+    )
+
+    gazebo_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [PathJoinSubstitution([gzb_share, 'launch', 'gazebo.launch.py'])]
+        ),
+        launch_arguments={'world': world}.items()
     )
 
     robot_state_publisher = Node(
@@ -41,13 +50,6 @@ def generate_launch_description():
             'use_sim_time': True,
             'robot_description': robot_description_content
         }]
-    )
-
-    gazebo_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [PathJoinSubstitution([get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py'])]
-        ),
-        launch_arguments={'world': world}.items()
     )
 
     spawn_entity = Node(
@@ -69,7 +71,7 @@ def generate_launch_description():
                 executable='spawner',
                 arguments=[
                     'joint_state_broadcaster',
-                    '--controller-manager', 'controller_manager',
+                    '--controller-manager', '/controller_manager',
                     # PathJoinSubstitution(['/', entity_name, 'controller_manager']),
                     '--controller-manager-timeout', '600'
                 ],
@@ -86,7 +88,7 @@ def generate_launch_description():
                 executable='spawner',
                 arguments=[
                     'arm_controller', 
-                    '--controller-manager', 'controller_manager',
+                    '--controller-manager', '/controller_manager',
                     # PathJoinSubstitution(['/', entity_name, 'controller_manager']),
                     '--controller-manager-timeout', '600'
                 ],
@@ -99,11 +101,21 @@ def generate_launch_description():
         [pkg_share, 'config', 'mycobot_jn.rviz']
     )
 
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', rviz_config],
+        parameters=[{'use_sim_time': True}],
+        condition=IfCondition(use_rviz)
+    )
+
     return LaunchDescription([
         DeclareLaunchArgument(
             'world',
             default_value=PathJoinSubstitution(
-                [get_package_share_directory('gazebo_ros'), 'worlds', 'empty.world']
+                [gzb_share, 'worlds', 'empty.world']
             ),
             description='Gazebo world file to load'
         ),
@@ -117,9 +129,15 @@ def generate_launch_description():
             default_value=rviz_default_config,
             description='Full path to the RViz config file to use'
         ),
-        robot_state_publisher,
+        DeclareLaunchArgument(
+            'use_rviz',
+            default_value='true',
+            description='Whether to start RViz alongside Gazebo'
+        ),
         gazebo_launch,
+        robot_state_publisher,
         spawn_entity,
         after_spawn_jsb,
         after_spawn_arm,
+        rviz_node,
     ])

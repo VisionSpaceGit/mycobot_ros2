@@ -10,19 +10,19 @@ controller_manager:
 arm_controller:
   ros__parameters:
     joints:
-      - joint2_to_joint1
-      - joint3_to_joint2
-      - joint4_to_joint3
-      - joint5_to_joint4
-      - joint6_to_joint5
-      - joint6output_to_joint6
+      - joint1_to_joint2
+      - joint2_to_joint3
+      - joint3_to_joint4
+      - joint4_to_joint5
+      - joint5_to_joint6
+      - joint6_to_joint6output
     command_interfaces:
       - position
     state_interfaces:
       - position
       - velocity
-    state_publish_rate: 50.0
-    action_monitor_rate: 20.0
-    constraints:
-      stopped_velocity_tolerance: 0.01
-      goal_time: 2.0
+    # state_publish_rate: 50.0
+    # action_monitor_rate: 20.0
+    # constraints:
+    #   stopped_velocity_tolerance: 0.01
+    #   goal_time: 2.0

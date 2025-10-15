@@ -4,29 +4,60 @@
   <xacro:property name="ros2_control_config_path" value="$(arg ros2_control_config)"/>
   <xacro:property name="jn_mesh_path" value="$(find mycobot_description)/urdf/mycobot_280_jn"/>
 
-  <xacro:macro name="inertial_box" params="mass x y z">
+  <xacro:property name="link1_mass" value="0.12"/>
+  <xacro:property name="link2_mass" value="0.19"/>
+  <xacro:property name="link3_mass" value="0.16"/>
+  <xacro:property name="link4_mass" value="0.124"/>
+  <xacro:property name="link5_mass" value="0.11"/>
+  <xacro:property name="link6_mass" value="0.0739"/>
+  <xacro:property name="flange_mass" value="0.035"/>
+
+  <xacro:macro name="link_inertial" params="mass ixx iyy izz">
     <inertial>
       <mass value="${mass}"/>
       <origin xyz="0 0 0" rpy="0 0 0"/>
-      <inertia ixx="${mass * (y*y + z*z) / 12.0}"
-               ixy="0"
-               ixz="0"
-               iyy="${mass * (x*x + z*z) / 12.0}"
-               iyz="0"
-               izz="${mass * (x*x + y*y) / 12.0}"/>
+       <inertia
+        ixx="${ixx}" ixy="0.0" ixz="0.0"
+        iyy="${iyy}" iyz="0.0"
+        izz="${izz}"/>
     </inertial>
   </xacro:macro>
-
+  
   <!-- world anchoring -->
-  <link name="world_link"/>
+  <link name="world"/>
+
+  <!-- Ground contact frame at the floor plane -->
+  <link name="base_footprint">
+    <!-- <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.001"/>
+      <inertia ixx="1e-6" iyy="1e-6" izz="1e-6" ixy="0" ixz="0" iyz="0"/>
+    </inertial> -->
+    <xacro:link_inertial mass="0.001" ixx="1e-6" iyy="1e-6" izz="1e-6"/>
+    <collision>
+      <!-- <origin xyz="0 0 0" rpy="0 0 0"/> -->
+      <origin xyz="0 0 0.005" rpy="0 0 0"/>
+      <geometry>
+        <!-- <cylinder radius="0.07" length="0.001"/> -->
+        <cylinder radius="0.07" length="0.01"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Virtual joint to anchor the robot to the world frame for MoveIt -->
+  <joint name="virtual_joints" type="fixed">
+    <parent link="world"/>
+    <child link="base_footprint"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
 
   <!-- base link -->
   <link name="joint1">
-    <inertial>
+    <!-- <inertial>
       <mass value="1.2"/>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <inertia ixx="0.002" ixy="0" ixz="0" iyy="0.002" iyz="0" izz="0.002"/>
-    </inertial>
+    </inertial> -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 3.14159"/>
       <geometry>
@@ -39,13 +70,22 @@
         <mesh filename="file://${jn_mesh_path}/joint1_jet.dae"/>
       </geometry>
     </collision>
+    <!-- <xacro:link_inertial mass="${link1_mass}" ixx="0.000148" iyy="0.000148" izz="0.000096"/> -->
+    <xacro:link_inertial mass="${link1_mass}" ixx="0.0148" iyy="0.0148" izz="0.0096"/>
   </link>
 
-  <joint name="joint1_to_world" type="fixed">
-    <parent link="world_link"/>
+  <!-- Anchor the base at the floor so the mesh sits fully above z = 0 -->
+  <joint name="base_footprint_to_g_base" type="fixed">
+    <parent link="base_footprint"/>
     <child link="joint1"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
+
+  <!-- <joint name="joint1_to_world" type="fixed">
+    <parent link="base_link"/>
+    <child link="joint1"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint> -->
 
   <link name="joint2">
     <visual>
@@ -60,10 +100,12 @@
         <mesh filename="file://${jn_mesh_path}/joint2.dae"/>
       </geometry>
     </collision>
-    <xacro:inertial_box mass="0.8" x="0.08" y="0.08" z="0.12"/>
+    <!-- <xacro:inertial_box mass="0.8" x="0.08" y="0.08" z="0.12"/> -->
+    <!-- <xacro:link_inertial mass="${link2_mass}" ixx="0.000148" iyy="0.000148" izz="0.000096"/> -->
+    <xacro:link_inertial mass="${link2_mass}" ixx="0.0148" iyy="0.0148" izz="0.0096"/>
   </link>
 
-  <joint name="joint2_to_joint1" type="revolute">
+  <joint name="joint1_to_joint2" type="revolute">
     <parent link="joint1"/>
     <child link="joint2"/>
     <origin xyz="0 0 0.15756" rpy="0 0 0"/>
@@ -85,10 +127,12 @@
         <mesh filename="file://${jn_mesh_path}/joint3.dae"/>
       </geometry>
     </collision>
-    <xacro:inertial_box mass="0.6" x="0.07" y="0.07" z="0.11"/>
+    <!-- <xacro:inertial_box mass="0.6" x="0.07" y="0.07" z="0.11"/> -->
+    <!-- <xacro:link_inertial mass="${link3_mass}" ixx="0.000148" iyy="0.000148" izz="0.000096"/> -->
+    <xacro:link_inertial mass="${link3_mass}" ixx="0.0148" iyy="0.0148" izz="0.0096"/>
   </link>
 
-  <joint name="joint3_to_joint2" type="revolute">
+  <joint name="joint2_to_joint3" type="revolute">
     <parent link="joint2"/>
     <child link="joint3"/>
     <origin xyz="0 0 -0.001" rpy="0 1.5708 -1.5708"/>
@@ -110,10 +154,12 @@
         <mesh filename="file://${jn_mesh_path}/joint4.dae"/>
       </geometry>
     </collision>
-    <xacro:inertial_box mass="0.4" x="0.22" y="0.07" z="0.07"/>
+    <!-- <xacro:inertial_box mass="0.4" x="0.22" y="0.07" z="0.07"/> -->
+    <!-- <xacro:link_inertial mass="${link4_mass}" ixx="0.000103" iyy="0.000103" izz="0.000096"/> -->
+    <xacro:link_inertial mass="${link4_mass}" ixx="0.0103" iyy="0.0103" izz="0.0096"/>
   </link>
 
-  <joint name="joint4_to_joint3" type="revolute">
+  <joint name="joint3_to_joint4" type="revolute">
     <parent link="joint3"/>
     <child link="joint4"/>
     <origin xyz="-0.1104 0 0" rpy="0 0 0"/>
@@ -124,24 +170,29 @@
 
   <link name="joint5">
     <visual>
-      <origin xyz="0 0 -0.03356" rpy="0 -1.5708 1.5708"/>
+      <origin xyz="0 0 -0.03356" rpy="-1.5708 0 0"/>
+      <!-- <origin xyz="0 0 -0.03356" rpy="0 -1.5708 1.5708"/> -->
       <geometry>
         <mesh filename="file://${jn_mesh_path}/joint5.dae"/>
       </geometry>
     </visual>
     <collision>
-      <origin xyz="0 0 -0.03356" rpy="0 -1.5708 1.5708"/>
+      <origin xyz="0 0 -0.03356" rpy="-1.5708 0 0"/>
+      <!-- <origin xyz="0 0 -0.03356" rpy="0 -1.5708 1.5708"/> -->
       <geometry>
         <mesh filename="file://${jn_mesh_path}/joint5.dae"/>
       </geometry>
     </collision>
-    <xacro:inertial_box mass="0.35" x="0.16" y="0.06" z="0.06"/>
+    <!-- <xacro:inertial_box mass="0.35" x="0.16" y="0.06" z="0.06"/> -->
+    <!-- <xacro:link_inertial mass="${link5_mass}" ixx="0.000103" iyy="0.000103" izz="0.000096"/> -->
+    <xacro:link_inertial mass="${link5_mass}" ixx="0.0103" iyy="0.0103" izz="0.0096"/>
   </link>
 
-  <joint name="joint5_to_joint4" type="revolute">
+  <joint name="joint4_to_joint5" type="revolute">
     <parent link="joint4"/>
     <child link="joint5"/>
-    <origin xyz="-0.096 0 0.06462" rpy="0 0 -1.5708"/>
+    <origin xyz= "-0.096 0 0.06462" rpy = "0 0 -1.5708"/>
+    <!-- <origin xyz= "-0.096 0 0.06462" rpy = "0 0 0"/> -->
     <axis xyz="0 0 1"/>
     <limit effort="56.0" lower="-2.5307" upper="2.5307" velocity="2.792527"/>
     <dynamics damping="0.0" friction="0.0"/>
@@ -160,10 +211,12 @@
         <mesh filename="file://${jn_mesh_path}/joint6.dae"/>
       </geometry>
     </collision>
-    <xacro:inertial_box mass="0.3" x="0.12" y="0.05" z="0.05"/>
+    <!-- <xacro:inertial_box mass="0.3" x="0.12" y="0.05" z="0.05"/> -->
+    <!-- <xacro:link_inertial mass="${link6_mass}" ixx="0.00006649" iyy="0.00006649" izz="0.000096"/> -->
+    <xacro:link_inertial mass="${link6_mass}" ixx="0.0006649" iyy="0.0006649" izz="0.00096"/>
   </link>
 
-  <joint name="joint6_to_joint5" type="revolute">
+  <joint name="joint5_to_joint6" type="revolute">
     <parent link="joint5"/>
     <child link="joint6"/>
     <origin xyz="0 -0.07318 0" rpy="1.5708 -1.5708 0"/>
@@ -185,10 +238,12 @@
         <mesh filename="file://${jn_mesh_path}/joint7.dae"/>
       </geometry>
     </collision>
-    <xacro:inertial_box mass="0.2" x="0.08" y="0.04" z="0.04"/>
+    <!-- <xacro:inertial_box mass="0.2" x="0.08" y="0.04" z="0.04"/> -->
+    <!-- <xacro:link_inertial mass="${flange_mass}" ixx="0.0000149" iyy="0.0000149" izz="0.0000196"/> -->
+    <xacro:link_inertial mass="${flange_mass}" ixx="0.000149" iyy="0.000149" izz="0.000196"/>
   </link>
 
-  <joint name="joint6output_to_joint6" type="revolute">
+  <joint name="joint6_to_joint6output" type="revolute">
     <parent link="joint6"/>
     <child link="joint6_flange"/>
     <origin xyz="0 0.0456 0" rpy="-1.5708 0 0"/>
@@ -201,32 +256,32 @@
     <hardware>
       <plugin>gazebo_ros2_control/GazeboSystem</plugin>
     </hardware>
-    <joint name="joint2_to_joint1">
+    <joint name="joint1_to_joint2">
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    <joint name="joint3_to_joint2">
+    <joint name="joint2_to_joint3">
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    <joint name="joint4_to_joint3">
+    <joint name="joint3_to_joint4">
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    <joint name="joint5_to_joint4">
+    <joint name="joint4_to_joint5">
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    <joint name="joint6_to_joint5">
+    <joint name="joint5_to_joint6">
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-    <joint name="joint6output_to_joint6">
+    <joint name="joint6_to_joint6output">
       <command_interface name="position"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
@@ -235,7 +290,7 @@
 
   <gazebo>
     <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
-      <robot_sim_type>gazebo_ros2_control/DefaultRobotHWSim</robot_sim_type>
+      <!-- <robot_sim_type>gazebo_ros2_control/DefaultRobotHWSim</robot_sim_type> -->
       <parameters>${ros2_control_config_path}</parameters>
     </plugin>
   </gazebo>
