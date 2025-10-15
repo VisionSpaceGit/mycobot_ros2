@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot  xmlns:xacro="http://www.ros.org/wiki/xacro" name="firefighter" >
 	
-<xacro:property name="width" value=".2" />
+  <xacro:property name="width" value=".2" />
 
 
   <link name="joint1">
@@ -48,7 +48,7 @@
 
 
 
-<link name="joint5">
+  <link name="joint5">
     <visual>
       <geometry>
        <!--- 0.0 0 -0.04 -->
@@ -84,7 +84,7 @@
 
 
 
-    <joint name="joint2_to_joint1" type="revolute">
+  <joint name="joint2_to_joint1" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort = "1000.0" lower = "-2.9322" upper = "2.9322" velocity = "0"/>
     <parent link="joint1"/>

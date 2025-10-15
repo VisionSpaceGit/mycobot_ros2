@@ -29,7 +29,7 @@ else:
 def acquire(lock_file):
     try:
         fd = os.open(lock_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC)
-    except OSError as e:
+    except OSError:
         return None
     timeout = 50.0
     start_time = current_time = time.time()
@@ -37,7 +37,7 @@ def acquire(lock_file):
         try:
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             return fd
-        except:
+        except Exception:
             time.sleep(1)
             current_time = time.time()
     os.close(fd)
@@ -48,7 +48,7 @@ def release(fd):
     try:
         fcntl.flock(fd, fcntl.LOCK_UN)
         os.close(fd)
-    except:
+    except Exception:
         pass
 
 
@@ -78,10 +78,12 @@ class MyCobotDriver(Node):
             PumpStatus, 'set_pump_status', self.set_pump_callback)  # pump control service
 
     def publish_joint_states(self):
+        lock = acquire('/tmp/mycobot_lock')
+        if lock is None:
+            self.get_logger().error("Failed to acquire lock for joint state publish.")
+            return
         try:
-            lock = acquire('/tmp/mycobot_lock')
             angles = self.mc.get_angles()
-            release(lock)
             if not angles or not isinstance(angles, list) or angles[0:3] == [0.0, 0.0, 0.0] or len(angles) != 6:
                 return
             js = JointState()
@@ -100,11 +102,16 @@ class MyCobotDriver(Node):
         except Exception as e:
             e = traceback.format_exc()
             self.get_logger().error(f"Joint state publish error: {e}")
+        finally:
+            release(lock)
 
     def set_angles_callback(self, request, response):
+        lock = acquire('/tmp/mycobot_lock')
+        if lock is None:
+            self.get_logger().error("Failed to acquire lock for set_angles request.")
+            response.flag = False
+            return response
         try:
-            lock = acquire('/tmp/mycobot_lock')
-
             # angles list
             angles = [
                 request.joint_1,
@@ -118,37 +125,44 @@ class MyCobotDriver(Node):
 
             # send angles
             self.mc.send_angles(angles, speed)
-            release(lock)
-
             response.flag = True  # srv return is bool flag
         except Exception as e:
             e = traceback.format_exc()
-            release(lock)
             self.get_logger().error(f"SetJointAngles service error: {e}")
             response.flag = False
+        finally:
+            release(lock)
         return response
 
     def set_coords_callback(self, request, response):
+        lock = acquire('/tmp/mycobot_lock')
+        if lock is None:
+            self.get_logger().error("Failed to acquire lock for set_coords request.")
+            response.flag = False
+            return response
         try:
-            lock = acquire('/tmp/mycobot_lock')
             coords = [request.x, request.y, request.z,
                       request.rx, request.ry, request.rz]
             self.mc.send_coords(coords, request.speed, request.model)
-            release(lock)
             response.flag = True
         except Exception as e:
             e = traceback.format_exc()
             self.get_logger().error(f"Set coords failed: {e}")
             response.flag = False
+        finally:
+            release(lock)
         return response
 
     def get_coords_callback(self, request, response):
+        lock = acquire('/tmp/mycobot_lock')
+        if lock is None:
+            self.get_logger().error("Failed to acquire lock for get_coords request.")
+            return response
         try:
-            lock = acquire('/tmp/mycobot_lock')
             coords = self.mc.get_coords()
-            release(lock)
             if not coords or len(coords) != 6:
-                return
+                self.get_logger().error("Invalid coordinates received from myCobot.")
+                return response
             if coords and all(c != -1 for c in coords) and len(coords) == 6:
                 response.x = coords[0]
                 response.y = coords[1]
@@ -161,14 +175,17 @@ class MyCobotDriver(Node):
         except Exception as e:
             e = traceback.format_exc()
             self.get_logger().error(f"GetCoords service error: {e}")
+        finally:
+            release(lock)
         return response
 
     def get_angles_callback(self, request, response):
+        lock = acquire('/tmp/mycobot_lock')
+        if lock is None:
+            self.get_logger().error("Failed to acquire lock for get_angles request.")
+            return response
         try:
-            lock = acquire('/tmp/mycobot_lock')
             angles = self.mc.get_angles()
-            release(lock)
-
             if angles and all(a != -1 for a in angles) and len(angles) == 6:
                 response.joint_1 = angles[0]
                 response.joint_2 = angles[1]
@@ -181,29 +198,40 @@ class MyCobotDriver(Node):
         except Exception as e:
             e = traceback.format_exc()
             self.get_logger().error(f"GetAngles service error: {e}")
+        finally:
+            release(lock)
         return response
 
     def set_gripper_callback(self, request, response):
+        lock = acquire('/tmp/mycobot_lock')
+        if lock is None:
+            self.get_logger().error("Failed to acquire lock for set_gripper request.")
+            response.flag = False
+            return response
         try:
-            lock = acquire('/tmp/mycobot_lock')
             speed = 80
 
             if request.status:
                 self.mc.set_gripper_state(0, speed, 1)  # open gripper
             else:
                 self.mc.set_gripper_state(1, speed, 1)  # close gripper
-            release(lock)
             response.flag = True
         except Exception as e:
             e = traceback.format_exc()
             self.get_logger().error(f"SetGripper service error: {e}")
             response.flag = False
+        finally:
+            release(lock)
         return response
 
     def set_pump_callback(self, request, response):
         # self.get_logger().info(f"The server receives the request: status={request.status}, pin1={request.pin1}, pin2={request.pin2}")
+        lock = acquire('/tmp/mycobot_lock')
+        if lock is None:
+            self.get_logger().error("Failed to acquire lock for set_pump request.")
+            response.flag = False
+            return response
         try:
-            lock = acquire('/tmp/mycobot_lock')
             pin1 = request.pin1
             pin2 = request.pin2
             if request.status:
@@ -216,12 +244,13 @@ class MyCobotDriver(Node):
                 time.sleep(0.05)
                 self.mc.set_basic_output(pin1, 1)
                 time.sleep(0.05)
-            release(lock)
             response.flag = True
         except Exception as e:
             e = traceback.format_exc()
-            self.get_logger().error(f"SetGripper service error: {e}")
+            self.get_logger().error(f"SetPump service error: {e}")
             response.flag = False
+        finally:
+            release(lock)
         return response
 
 

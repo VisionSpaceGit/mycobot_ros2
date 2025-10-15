@@ -74,6 +74,7 @@ class WindowNode(Node):
     def __init__(self, handle):
         super().__init__('simple_gui')
         self.mc = MyCobot280("/dev/ttyTHS1", 1000000)
+        # self.mc = MyCobot280("/dev/tty", 1000000)
         time.sleep(0.05)
         self.mc.set_fresh_mode(1)
         time.sleep(0.05)

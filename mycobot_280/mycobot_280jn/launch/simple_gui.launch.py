@@ -15,6 +15,7 @@ def generate_launch_description():
     port_launch_arg = DeclareLaunchArgument(
         name="port",
         default_value="/dev/ttyTHS1"
+        # default_value="/dev/tty"
     )
     res.append(port_launch_arg)
 
@@ -58,6 +59,13 @@ def generate_launch_description():
         parameters=[{'robot_description': robot_description}]
     )
     res.append(robot_state_publisher_node)
+    
+    fake_joint_pub = Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher'
+    )
+    res.append(fake_joint_pub)
 
     rviz_node = Node(
         name="rviz2",

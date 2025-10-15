@@ -54,6 +54,13 @@ def generate_launch_description():
         arguments=[LaunchConfiguration("model")]
     )
     res.append(robot_state_publisher_node)
+    
+    fake_joint_pub = Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher'
+    )
+    res.append(fake_joint_pub)
 
     follow_display_node = Node(
         package="mycobot_280jn",

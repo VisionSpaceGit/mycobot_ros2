@@ -1,0 +1,242 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mycobot_280_jn">
+  <xacro:arg name="ros2_control_config" default=""/>
+  <xacro:property name="ros2_control_config_path" value="$(arg ros2_control_config)"/>
+  <xacro:property name="jn_mesh_path" value="$(find mycobot_description)/urdf/mycobot_280_jn"/>
+
+  <xacro:macro name="inertial_box" params="mass x y z">
+    <inertial>
+      <mass value="${mass}"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="${mass * (y*y + z*z) / 12.0}"
+               ixy="0"
+               ixz="0"
+               iyy="${mass * (x*x + z*z) / 12.0}"
+               iyz="0"
+               izz="${mass * (x*x + y*y) / 12.0}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- world anchoring -->
+  <link name="world_link"/>
+
+  <!-- base link -->
+  <link name="joint1">
+    <inertial>
+      <mass value="1.2"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.002" ixy="0" ixz="0" iyy="0.002" iyz="0" izz="0.002"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 3.14159"/>
+      <geometry>
+        <mesh filename="file://${jn_mesh_path}/joint1_jet.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 3.14159"/>
+      <geometry>
+        <mesh filename="file://${jn_mesh_path}/joint1_jet.dae"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="joint1_to_world" type="fixed">
+    <parent link="world_link"/>
+    <child link="joint1"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="joint2">
+    <visual>
+      <origin xyz="0 0 -0.06096" rpy="0 0 -1.5708"/>
+      <geometry>
+        <mesh filename="file://${jn_mesh_path}/joint2.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.06096" rpy="0 0 -1.5708"/>
+      <geometry>
+        <mesh filename="file://${jn_mesh_path}/joint2.dae"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_box mass="0.8" x="0.08" y="0.08" z="0.12"/>
+  </link>
+
+  <joint name="joint2_to_joint1" type="revolute">
+    <parent link="joint1"/>
+    <child link="joint2"/>
+    <origin xyz="0 0 0.15756" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="56.0" lower="-2.9322" upper="2.9322" velocity="2.792527"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+
+  <link name="joint3">
+    <visual>
+      <origin xyz="0 0 0.03256" rpy="0 -1.5708 0"/>
+      <geometry>
+        <mesh filename="file://${jn_mesh_path}/joint3.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.03256" rpy="0 -1.5708 0"/>
+      <geometry>
+        <mesh filename="file://${jn_mesh_path}/joint3.dae"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_box mass="0.6" x="0.07" y="0.07" z="0.11"/>
+  </link>
+
+  <joint name="joint3_to_joint2" type="revolute">
+    <parent link="joint2"/>
+    <child link="joint3"/>
+    <origin xyz="0 0 -0.001" rpy="0 1.5708 -1.5708"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="56.0" lower="-2.3562" upper="2.3562" velocity="2.792527"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+
+  <link name="joint4">
+    <visual>
+      <origin xyz="0 0 0.03056" rpy="0 -1.5708 0"/>
+      <geometry>
+        <mesh filename="file://${jn_mesh_path}/joint4.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.03056" rpy="0 -1.5708 0"/>
+      <geometry>
+        <mesh filename="file://${jn_mesh_path}/joint4.dae"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_box mass="0.4" x="0.22" y="0.07" z="0.07"/>
+  </link>
+
+  <joint name="joint4_to_joint3" type="revolute">
+    <parent link="joint3"/>
+    <child link="joint4"/>
+    <origin xyz="-0.1104 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="56.0" lower="-2.618" upper="2.618" velocity="2.792527"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+
+  <link name="joint5">
+    <visual>
+      <origin xyz="0 0 -0.03356" rpy="0 -1.5708 1.5708"/>
+      <geometry>
+        <mesh filename="file://${jn_mesh_path}/joint5.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.03356" rpy="0 -1.5708 1.5708"/>
+      <geometry>
+        <mesh filename="file://${jn_mesh_path}/joint5.dae"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_box mass="0.35" x="0.16" y="0.06" z="0.06"/>
+  </link>
+
+  <joint name="joint5_to_joint4" type="revolute">
+    <parent link="joint4"/>
+    <child link="joint5"/>
+    <origin xyz="-0.096 0 0.06462" rpy="0 0 -1.5708"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="56.0" lower="-2.5307" upper="2.5307" velocity="2.792527"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+
+  <link name="joint6">
+    <visual>
+      <origin xyz="0 0 -0.038" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file://${jn_mesh_path}/joint6.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.038" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file://${jn_mesh_path}/joint6.dae"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_box mass="0.3" x="0.12" y="0.05" z="0.05"/>
+  </link>
+
+  <joint name="joint6_to_joint5" type="revolute">
+    <parent link="joint5"/>
+    <child link="joint6"/>
+    <origin xyz="0 -0.07318 0" rpy="1.5708 -1.5708 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="56.0" lower="-2.8798" upper="2.8798" velocity="2.792527"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+
+  <link name="joint6_flange">
+    <visual>
+      <origin xyz="0 0 -0.012" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file://${jn_mesh_path}/joint7.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.012" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file://${jn_mesh_path}/joint7.dae"/>
+      </geometry>
+    </collision>
+    <xacro:inertial_box mass="0.2" x="0.08" y="0.04" z="0.04"/>
+  </link>
+
+  <joint name="joint6output_to_joint6" type="revolute">
+    <parent link="joint6"/>
+    <child link="joint6_flange"/>
+    <origin xyz="0 0.0456 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="56.0" lower="-3.14159" upper="3.14159" velocity="2.792527"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+
+  <ros2_control name="mycobot_280jn_system" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+    <joint name="joint2_to_joint1">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="joint3_to_joint2">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="joint4_to_joint3">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="joint5_to_joint4">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="joint6_to_joint5">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="joint6output_to_joint6">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+      <robot_sim_type>gazebo_ros2_control/DefaultRobotHWSim</robot_sim_type>
+      <parameters>${ros2_control_config_path}</parameters>
+    </plugin>
+  </gazebo>
+</robot>
