@@ -27,6 +27,10 @@ def generate_launch_description():
         # [dsc_share, 'urdf', 'mycobot_280_jn', 'mycobot_280_jn_gazebo.urdf.xacro']
     )
 
+    rviz_default_config = PathJoinSubstitution(
+        [pkg_share, 'config', 'mycobot_jn.rviz']
+    )
+
     robot_description_content = ParameterValue(
         Command([
             'xacro', ' ', gazebo_xacro, ' ',
@@ -64,42 +68,28 @@ def generate_launch_description():
     )
 
     # 모델 삽입이 끝난 뒤 스포너 실행 (OnProcessExit)
-    after_spawn_jsb = RegisterEventHandler(
-        OnProcessExit(
-            target_action=spawn_entity,
-            on_exit=[Node(
-                package='controller_manager',
-                executable='spawner',
-                arguments=[
-                    'joint_state_broadcaster',
-                    '--controller-manager', '/controller_manager',
-                    # PathJoinSubstitution(['/', entity_name, 'controller_manager']),
-                    '--controller-manager-timeout', '600'
-                ],
-                output='screen'
-            )]
-        )
+    joint_state_broadcaster_spawner = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=[
+            'joint_state_broadcaster',
+            '--controller-manager', '/controller_manager',
+            # PathJoinSubstitution(['/', entity_name, 'controller_manager']),
+            '--controller-manager-timeout', '600'
+        ],
+        output='screen'
     )
 
-    after_spawn_arm = RegisterEventHandler(
-        OnProcessExit(
-            target_action=spawn_entity,
-            on_exit=[Node(
-                package='controller_manager',
-                executable='spawner',
-                arguments=[
-                    'arm_controller', 
-                    '--controller-manager', '/controller_manager',
-                    # PathJoinSubstitution(['/', entity_name, 'controller_manager']),
-                    '--controller-manager-timeout', '600'
-                ],
-                output='screen'
-            )]
-        )
-    )
-
-    rviz_default_config = PathJoinSubstitution(
-        [pkg_share, 'config', 'mycobot_jn.rviz']
+    arm_controller_spawner = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=[
+            'arm_controller', 
+            '--controller-manager', '/controller_manager',
+            # PathJoinSubstitution(['/', entity_name, 'controller_manager']),
+            '--controller-manager-timeout', '600'
+        ],
+        output='screen'
     )
 
     rviz_node = Node(
@@ -110,6 +100,27 @@ def generate_launch_description():
         arguments=['-d', rviz_config],
         parameters=[{'use_sim_time': True}],
         condition=IfCondition(use_rviz)
+    )
+
+    after_spawn_jsb = RegisterEventHandler(
+        OnProcessExit(
+            target_action=spawn_entity,
+            on_exit=[joint_state_broadcaster_spawner]
+        )
+    )
+
+    after_spawn_arm = RegisterEventHandler(
+        OnProcessExit(
+            target_action=spawn_entity,
+            on_exit=[arm_controller_spawner]
+        )
+    )
+
+    rviz_after_jsb = RegisterEventHandler(
+        OnProcessExit(
+            target_action=joint_state_broadcaster_spawner,
+            on_exit=[rviz_node]
+        )
     )
 
     return LaunchDescription([
@@ -140,5 +151,5 @@ def generate_launch_description():
         spawn_entity,
         after_spawn_jsb,
         after_spawn_arm,
-        rviz_node,
+        rviz_after_jsb,
     ])
