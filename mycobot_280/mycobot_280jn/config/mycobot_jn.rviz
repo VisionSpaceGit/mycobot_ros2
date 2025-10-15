@@ -8,8 +8,6 @@ Panels:
         - /Status1
         - /TF1
         - /RobotModel1
-        - /RobotModel1/Links1
-        - /RobotModel1/Links1/base_footprint1
       Splitter Ratio: 0.5
     Tree Height: 1184
   - Class: rviz_common/Selection
@@ -51,8 +49,6 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        base_footprint:
-          Value: true
         joint1:
           Value: true
         joint2:
@@ -67,7 +63,7 @@ Visualization Manager:
           Value: true
         joint6_flange:
           Value: true
-        world:
+        world_link:
           Value: true
       Marker Scale: 0.10000000149011612
       Name: TF
@@ -75,16 +71,15 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        world:
-          base_footprint:
-            joint1:
-              joint2:
-                joint3:
-                  joint4:
-                    joint5:
-                      joint6:
-                        joint6_flange:
-                          {}
+        world_link:
+          joint1:
+            joint2:
+              joint3:
+                joint4:
+                  joint5:
+                    joint6:
+                      joint6_flange:
+                        {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -105,11 +100,6 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        base_footprint:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         joint1:
           Alpha: 1
           Show Axes: false
@@ -145,7 +135,7 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        world:
+        world_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -157,7 +147,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: base_footprint
+    Fixed Frame: joint1
     Frame Rate: 30
   Name: root
   Tools:
@@ -200,7 +190,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 1.6899751424789429
+      Distance: 1.1302554607391357
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -215,10 +205,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.41479653120040894
+      Pitch: 0.689796507358551
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.4953896999359131
+      Yaw: 0.48538970947265625
     Saved: ~
 Window Geometry:
   Displays:
@@ -234,5 +224,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1268
-  X: 2688
-  Y: 1082
+  X: -2
+  Y: 564

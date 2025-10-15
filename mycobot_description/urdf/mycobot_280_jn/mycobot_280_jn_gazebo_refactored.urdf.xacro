@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mycobot_280_jn">
+  <!-- Arguments -->
+  <xacro:arg name="ros2_control_config" default=""/>
+  <xacro:arg name="use_static_base" default="false"/>
+
+  <!-- Common properties -->
+  <xacro:property name="mesh_path" value="$(find mycobot_description)/urdf/mycobot_280_jn"/>
+  <xacro:property name="ros2_control_config_path" value="$(arg ros2_control_config)"/>
+  <xacro:property name="joint_effort" value="56.0"/>
+  <xacro:property name="joint_velocity" value="2.792527"/>
+  <xacro:property name="joint_damping" value="0.05"/>
+  <xacro:property name="joint_friction" value="0.02"/>
+
+  <!-- helper macros -->
+  <xacro:macro name="inertial_box" params="mass ixx iyy izz">
+    <inertial>
+      <mass value="${mass}"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+       <inertia
+        ixx="${ixx}" ixy="0.0" ixz="0.0"
+        iyy="${iyy}" iyz="0.0"
+        izz="${izz}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="link_with_mesh" params="name mesh origin_xyz origin_rpy mass ixx iyy izz">
+    <link name="${name}">
+      <xacro:inertial_box mass="${mass}" ixx="${ixx}" iyy="${iyy}" izz="${izz}"/>
+      <visual>
+        <origin xyz="${origin_xyz}" rpy="${origin_rpy}"/>
+        <geometry>
+          <mesh filename="file://${mesh_path}/${mesh}"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="${origin_xyz}" rpy="${origin_rpy}"/>
+        <geometry>
+          <mesh filename="file://${mesh_path}/${mesh}"/>
+        </geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="revolute_joint" params="name parent child origin_xyz origin_rpy lower upper">
+    <joint name="${name}" type="revolute">
+      <parent link="${parent}"/>
+      <child link="${child}"/>
+      <origin xyz="${origin_xyz}" rpy="${origin_rpy}"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="${joint_effort}" lower="${lower}" upper="${upper}" velocity="${joint_velocity}"/>
+      <dynamics damping="${joint_damping}" friction="${joint_friction}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="make_static" params="link">
+    <xacro:if value="$(arg use_static_base)">
+      <gazebo reference="${link}">
+        <static>true</static>
+      </gazebo>
+    </xacro:if>
+  </xacro:macro>
+
+  <!-- world and base -->
+  <link name="world_link"/>
+
+  <xacro:link_with_mesh name="joint1" mesh="joint1_jet.dae"
+                        origin_xyz="0 0 0" origin_rpy="0 0 3.14159"
+                        mass="1.2" ixx="0.0148" iyy="0.0148" izz="0.0096"/>
+
+  <joint name="world_to_joint1" type="fixed">
+    <parent link="world_link"/>
+    <child link="joint1"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- remaining links -->
+  <xacro:link_with_mesh name="joint2" mesh="joint2.dae"
+                        origin_xyz="0 0 -0.06096" origin_rpy="0 0 -1.5708"
+                        mass="0.19" ixx="0.000148" iyy="0.000148" izz="0.000096"/>
+
+  <xacro:revolute_joint name="joint1_to_joint2"
+                        parent="joint1" child="joint2"
+                        origin_xyz="0 0 0.15756" origin_rpy="0 0 0"
+                        lower="-2.9322" upper="2.9322"/>
+
+  <xacro:link_with_mesh name="joint3" mesh="joint3.dae"
+                        origin_xyz="0 0 0.03256" origin_rpy="0 -1.5708 0"
+                        mass="0.16" ixx="0.000148" iyy="0.000148" izz="0.000096"/>
+
+  <xacro:revolute_joint name="joint2_to_joint3"
+                        parent="joint2" child="joint3"
+                        origin_xyz="0 0 -0.001" origin_rpy="0 1.5708 -1.5708"
+                        lower="-2.3562" upper="2.3562"/>
+
+  <xacro:link_with_mesh name="joint4" mesh="joint4.dae"
+                        origin_xyz="0 0 0.03056" origin_rpy="0 -1.5708 0"
+                        mass="0.124" ixx="0.000103" iyy="0.000103" izz="0.000096"/>
+
+  <xacro:revolute_joint name="joint3_to_joint4"
+                        parent="joint3" child="joint4"
+                        origin_xyz="-0.1104 0 0" origin_rpy="0 0 0"
+                        lower="-2.618" upper="2.618"/>
+
+  <xacro:link_with_mesh name="joint5" mesh="joint5.dae"
+                        origin_xyz="0 0 -0.03356" origin_rpy="-1.5708 0 0"
+                        mass="0.11" ixx="0.000103" iyy="0.000103" izz="0.000096"/>
+
+  <xacro:revolute_joint name="joint4_to_joint5"
+                        parent="joint4" child="joint5"
+                        origin_xyz="-0.096 0 0.06462" origin_rpy="0 0 -1.5708"
+                        lower="-2.5307" upper="2.5307"/>
+
+  <xacro:link_with_mesh name="joint6" mesh="joint6.dae"
+                        origin_xyz="0 0 -0.038" origin_rpy="0 0 0"
+                        mass="0.0739" ixx="0.00006649" iyy="0.00006649" izz="0.000096"/>
+
+  <xacro:revolute_joint name="joint5_to_joint6"
+                        parent="joint5" child="joint6"
+                        origin_xyz="0 -0.07318 0" origin_rpy="1.5708 -1.5708 0"
+                        lower="-2.8798" upper="2.8798"/>
+
+  <xacro:link_with_mesh name="joint6_flange" mesh="joint7.dae"
+                        origin_xyz="0 0 -0.012" origin_rpy="0 0 0"
+                        mass="0.035" ixx="0.0000149" iyy="0.0000149" izz="0.0000196"/>
+
+  <xacro:revolute_joint name="joint6_to_joint6output"
+                        parent="joint6" child="joint6_flange"
+                        origin_xyz="0 0.0456 0" origin_rpy="-1.5708 0 0"
+                        lower="-3.14159" upper="3.14159"/>
+
+  <!-- ros2_control configuration -->
+  <ros2_control name="mycobot_280jn_system" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+    <joint name="joint1_to_joint2">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="joint2_to_joint3">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="joint3_to_joint4">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="joint4_to_joint5">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="joint5_to_joint6">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="joint6_to_joint6output">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <!-- Optional static base -->
+  <xacro:make_static link="joint1"/>
+
+  <!-- Gazebo ros2_control plugin -->
+  <gazebo>
+    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+      <parameters>${ros2_control_config_path}</parameters>
+    </plugin>
+  </gazebo>
+</robot>

@@ -23,7 +23,8 @@ def generate_launch_description():
     )
 
     gazebo_xacro = PathJoinSubstitution(
-        [dsc_share, 'urdf', 'mycobot_280_jn', 'mycobot_280_jn_gazebo.urdf.xacro']
+        [dsc_share, 'urdf', 'mycobot_280_jn', 'mycobot_280_jn_gazebo_refactored.urdf.xacro']
+        # [dsc_share, 'urdf', 'mycobot_280_jn', 'mycobot_280_jn_gazebo.urdf.xacro']
     )
 
     robot_description_content = ParameterValue(
