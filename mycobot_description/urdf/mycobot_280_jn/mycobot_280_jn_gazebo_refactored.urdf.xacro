@@ -2,7 +2,6 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mycobot_280_jn">
   <!-- Arguments -->
   <xacro:arg name="ros2_control_config" default=""/>
-  <xacro:arg name="use_static_base" default="false"/>
 
   <!-- Common properties -->
   <xacro:property name="mesh_path" value="$(find mycobot_description)/urdf/mycobot_280_jn"/>
@@ -53,23 +52,23 @@
     </joint>
   </xacro:macro>
 
-  <xacro:macro name="make_static" params="link">
-    <xacro:if value="$(arg use_static_base)">
-      <gazebo reference="${link}">
-        <static>true</static>
-      </gazebo>
-    </xacro:if>
-  </xacro:macro>
-
   <!-- world and base -->
-  <link name="world_link"/>
+  <link name="world"/>
+  <link name="base_link"/>
+
+  <joint name="world_to_base" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
 
   <xacro:link_with_mesh name="joint1" mesh="joint1_jet.dae"
                         origin_xyz="0 0 0" origin_rpy="0 0 3.14159"
-                        mass="1.2" ixx="0.0148" iyy="0.0148" izz="0.0096"/>
+                        mass="1.2" ixx="0.000148" iyy="0.000148" izz="0.000096"/>
 
-  <joint name="world_to_joint1" type="fixed">
-    <parent link="world_link"/>
+  <joint name="base_to_joint1" type="fixed">
+    <!-- <parent link="world_link"/> -->
+    <parent link="base_link"/>
     <child link="joint1"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
@@ -108,7 +107,7 @@
 
   <xacro:revolute_joint name="joint4_to_joint5"
                         parent="joint4" child="joint5"
-                        origin_xyz="-0.096 0 0.06462" origin_rpy="0 0 -1.5708"
+                        origin_xyz="-0.0965 0 0.06462" origin_rpy="0 0 -1.5708"
                         lower="-2.5307" upper="2.5307"/>
 
   <xacro:link_with_mesh name="joint6" mesh="joint6.dae"
@@ -165,9 +164,6 @@
       <state_interface name="velocity"/>
     </joint>
   </ros2_control>
-
-  <!-- Optional static base -->
-  <xacro:make_static link="joint1"/>
 
   <!-- Gazebo ros2_control plugin -->
   <gazebo>

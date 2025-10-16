@@ -21,8 +21,3 @@ arm_controller:
     state_interfaces:
       - position
       - velocity
-    # state_publish_rate: 50.0
-    # action_monitor_rate: 20.0
-    # constraints:
-    #   stopped_velocity_tolerance: 0.01
-    #   goal_time: 2.0
