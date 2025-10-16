@@ -6,8 +6,11 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /Grid1
         - /TF1
         - /RobotModel1
+        - /RobotModel1/Description Topic1
+        - /RobotModel1/Links1
       Splitter Ratio: 0.5
     Tree Height: 1184
   - Class: rviz_common/Selection
@@ -49,6 +52,8 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
+        base_link:
+          Value: true
         joint1:
           Value: true
         joint2:
@@ -63,7 +68,7 @@ Visualization Manager:
           Value: true
         joint6_flange:
           Value: true
-        world_link:
+        world:
           Value: true
       Marker Scale: 0.10000000149011612
       Name: TF
@@ -71,15 +76,16 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        world_link:
-          joint1:
-            joint2:
-              joint3:
-                joint4:
-                  joint5:
-                    joint6:
-                      joint6_flange:
-                        {}
+        world:
+          base_link:
+            joint1:
+              joint2:
+                joint3:
+                  joint4:
+                    joint5:
+                      joint6:
+                        joint6_flange:
+                          {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -100,6 +106,10 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         joint1:
           Alpha: 1
           Show Axes: false
@@ -135,7 +145,7 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        world_link:
+        world:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -147,7 +157,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: joint1
+    Fixed Frame: base_link
     Frame Rate: 30
   Name: root
   Tools:
@@ -197,18 +207,18 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.1940089911222458
-        Y: -0.12068655341863632
-        Z: 0.02238636463880539
+        X: -0.11081293225288391
+        Y: 0.11626594513654709
+        Z: -0.0034483210183680058
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6947965025901794
+      Pitch: 0.8947961926460266
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.49038970470428467
+      Yaw: 5.533576488494873
     Saved: ~
 Window Geometry:
   Displays:

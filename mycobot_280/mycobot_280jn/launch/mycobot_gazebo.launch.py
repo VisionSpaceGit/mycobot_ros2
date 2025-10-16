@@ -58,7 +58,6 @@ def generate_launch_description():
         arguments=[
             'joint_state_broadcaster',
             '--controller-manager', '/controller_manager',
-            # PathJoinSubstitution(['/', entity_name, 'controller_manager']),
             '--controller-manager-timeout', '600'
         ],
         output='screen'
@@ -70,7 +69,6 @@ def generate_launch_description():
         arguments=[
             'arm_controller', 
             '--controller-manager', '/controller_manager',
-            # PathJoinSubstitution(['/', entity_name, 'controller_manager']),
             '--controller-manager-timeout', '600'
         ],
         output='screen'
