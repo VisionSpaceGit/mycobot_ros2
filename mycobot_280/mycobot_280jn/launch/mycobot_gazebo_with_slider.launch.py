@@ -133,6 +133,14 @@ def generate_launch_description():
     rviz_after_jsb = RegisterEventHandler(
         OnProcessExit(target_action=joint_state_broadcaster_spawner, on_exit=[rviz_node])
     )
+    
+    brige_after_jsb = RegisterEventHandler(
+        OnProcessExit(
+            target_action=joint_state_broadcaster_spawner, 
+            on_exit=[trajectory_bridge],
+        ),
+        condition=IfCondition(start_slider),
+    )
 
     slider_after_arm = RegisterEventHandler(
         OnProcessExit(
@@ -168,7 +176,7 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "goal_time",
-                default_value="0.5",
+                default_value="2.0",
                 description="Seconds for the controller to reach each target point.",
             ),
             DeclareLaunchArgument(
@@ -192,6 +200,7 @@ def generate_launch_description():
             after_spawn_jsb,
             after_spawn_arm,
             rviz_after_jsb,
+            brige_after_jsb,
             slider_after_arm,
         ]
     )

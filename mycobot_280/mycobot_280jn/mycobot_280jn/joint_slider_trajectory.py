@@ -30,7 +30,7 @@ class JointSliderTrajectoryBridge(Node):
             self.declare_parameter("trajectory_topic", "/arm_controller/joint_trajectory").value
         )
         self.goal_time: float = float(
-            self.declare_parameter("goal_time", 0.5).value
+            self.declare_parameter("goal_time", 5.0).value
         )
         self.min_delta: float = float(
             self.declare_parameter("min_position_delta", 1e-3).value
