@@ -1,42 +1,26 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Command
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
 from launch.event_handlers import OnProcessExit  
 from launch.conditions import IfCondition
+from mycobot_280jn.launch_utils import get_robot_description_parameter
 
 def generate_launch_description():
     gzb_share = get_package_share_directory('gazebo_ros')
     pkg_share = get_package_share_directory('mycobot_280jn')
-    dsc_share = get_package_share_directory('mycobot_description')
 
     world = LaunchConfiguration('world')
     entity_name = LaunchConfiguration('entity_name') 
     rviz_config = LaunchConfiguration('rviz_config')
     use_rviz = LaunchConfiguration('use_rviz')
 
-    ros2_control_config = PathJoinSubstitution(
-        [pkg_share, 'config', 'mycobot_280jn_ros2_control.yaml']
-    )
-
-    gazebo_xacro = PathJoinSubstitution(
-        [dsc_share, 'urdf', 'mycobot_280_jn', 'mycobot_280_jn_gazebo_refactored.urdf.xacro']
-        # [dsc_share, 'urdf', 'mycobot_280_jn', 'mycobot_280_jn_gazebo.urdf.xacro']
-    )
+    robot_description_content = get_robot_description_parameter()
 
     rviz_default_config = PathJoinSubstitution(
         [pkg_share, 'config', 'mycobot_jn.rviz']
-    )
-
-    robot_description_content = ParameterValue(
-        Command([
-            'xacro', ' ', gazebo_xacro, ' ',
-            'ros2_control_config:=', ros2_control_config
-        ]),
-        value_type=str
     )
 
     gazebo_launch = IncludeLaunchDescription(
