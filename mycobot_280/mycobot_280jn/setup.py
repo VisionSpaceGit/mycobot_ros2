@@ -61,6 +61,7 @@ setup(
             'listen_real_service = mycobot_280jn.listen_real_service:main',
             'teleop_keyboard = mycobot_280jn.teleop_keyboard:main',
             'slider_control_adaptive_gripper = mycobot_280jn.slider_control_adaptive_gripper:main',
+            'joint_slider_trajectory = mycobot_280jn.joint_slider_trajectory:main',
         ],
     },
 )
