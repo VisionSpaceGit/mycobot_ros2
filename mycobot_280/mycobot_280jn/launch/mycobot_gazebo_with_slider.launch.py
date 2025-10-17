@@ -145,7 +145,7 @@ def generate_launch_description():
     slider_after_arm = RegisterEventHandler(
         OnProcessExit(
             target_action=arm_controller_spawner,
-            on_exit=[slider_gui, trajectory_bridge],
+            on_exit=[slider_gui],
         ),
         condition=IfCondition(start_slider),
     )
